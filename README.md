@@ -12,7 +12,7 @@ Everything is organized by **Projects** (one per client or per agent), and it al
 
 ## 🚀 Deploy your own in one click
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/mani-kanasani/voicelab)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/mani-kanasani/VoiceLabV2)
 
 ### What you need
 - A **GitHub** account (free — the deploy button forks this repo into your account).
