@@ -35,6 +35,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
 
   const input = (
     <input
+      {...rest}
       ref={ref}
       id={rest.id ?? field?.controlId}
       aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
@@ -50,7 +51,6 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         focusRing(s),
         className,
       )}
-      {...rest}
     />
   );
 
@@ -89,6 +89,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   const bad = invalid ?? field?.invalid ?? false;
   return (
     <textarea
+      {...rest}
       ref={ref}
       rows={rows}
       id={rest.id ?? field?.controlId}
@@ -102,7 +103,6 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         focusRing(s),
         className,
       )}
-      {...rest}
     />
   );
 });

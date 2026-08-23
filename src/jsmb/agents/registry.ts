@@ -329,7 +329,7 @@ export const AGENTS: AgentDef[] = [
     ],
     guardrails: [
       "Refuses to issue an invoice without a seller GSTIN.",
-      "No invoice before the order is paid in full — dues get a proforma, not a tax invoice.",
+      "Bills a prepaid order only once the payment succeeds, and a credit order only once the credit is released — never against a pending payment.",
       "Invoice numbers are sequential and never reused, even after a cancellation.",
       "Uses the GST rate on file; it never guesses a rate for a new product.",
     ],

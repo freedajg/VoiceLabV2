@@ -26,6 +26,7 @@ import type {
   CustomerSegment,
   Employee,
   Enquiry,
+  EnquiryStatus,
   Invoice,
   Order,
   OrderChannel,
@@ -41,7 +42,6 @@ import {
   DEFAULT_COST_CONFIG,
   DEMO_TODAY,
   MAX_ORDER_KG,
-  PRODUCTS,
   PRODUCT_BY_CODE,
   ROSTER_TEMPLATE,
   SEED,
@@ -159,8 +159,8 @@ const MONTH_WEIGHT: Record<string, number> = {
   "2026-03": 0.94,
   "2026-04": 1.0,
   "2026-05": 1.1,
-  "2026-06": 1.26,
-  "2026-07": 1.26,
+  "2026-06": 1.16,
+  "2026-07": 1.16,
 };
 
 const EMPLOYEE_NAMES: Record<string, string[]> = {
@@ -214,7 +214,7 @@ function buildCustomers(rng: () => number): Customer[] {
 
     const isFirm = Boolean(spec.company);
     // FR-A-04 — a minority of trade buyers are credit-approved.
-    const creditApproved = isFirm && spec.segment !== "retail" && i % 4 === 0;
+    const creditApproved = isFirm && spec.segment !== "retail" && (i % 4 === 0 || i % 7 === 5);
     const creditLimit = creditApproved
       ? pick(rng, [50_000, 75_000, 1_00_000, 1_50_000, 2_00_000, 3_00_000, 5_00_000])
       : 0;
@@ -432,7 +432,7 @@ function buildOrders(rng: () => number, customers: Customer[]): BuiltOrders {
          breached (a storefront basket that would exceed it becomes an enquiry
          instead, per FR-W-05). */
       const lineCount = weightedPick(rng, [1, 2, 3] as const, [60, 28, 12]);
-      const bulk = chance(rng, 0.12);
+      const bulk = chance(rng, 0.06);
       const used = new Set<ProductCode>();
       const inputs: { productCode: ProductCode; size: number; unit: "bundle" | "lot"; qty: number }[] = [];
       let weightSoFar = 0;
@@ -448,7 +448,7 @@ function buildOrders(rng: () => number, customers: Customer[]): BuiltOrders {
 
         const unit: "bundle" | "lot" = bulk && li === 0 ? "lot" : "bundle";
         const perUnitKg = unit === "lot" ? 500 : 25;
-        const wanted = unit === "lot" ? skewedInt(rng, 2, 30, 2.0) : skewedInt(rng, 2, 40, 1.7);
+        const wanted = unit === "lot" ? skewedInt(rng, 2, 30, 4.0) : skewedInt(rng, 3, 50, 1.7);
         const room = Math.floor((MAX_ORDER_KG - weightSoFar) / perUnitKg);
         const qty = Math.min(wanted, room);
         if (qty <= 0) break;
@@ -460,7 +460,15 @@ function buildOrders(rng: () => number, customers: Customer[]): BuiltOrders {
 
       const quote = quoteOrder(inputs, { ...ctx, region: customer.region });
       const ageDays = daysBetween(day, DEMO_TODAY);
-      const status = pickStatus(rng, ageDays);
+      const rolled = pickStatus(rng, ageDays);
+      // Multi-tonne orders are confirmed on the phone before the mill runs
+      // them, so they are never the ones that fall through.
+      const status: OrderStatus =
+        rolled === "cancelled" && quote.totalWeightKg > 3000
+          ? ageDays > 10
+            ? "delivered"
+            : "dispatched"
+          : rolled;
       const mode = pickMode(rng, customer);
       const settled = settle(rng, quote.total, mode, status, ageDays);
 
@@ -553,17 +561,28 @@ const ENQUIRY_SPECS: { name: string; city: string; region: Region; issue: string
   { name: "Rekha Sharma", city: "Secunderabad", region: "telangana", issue: "GST invoice format needed for accounts.", kind: "contact" },
 ];
 
+/** Ages in days at DEMO_TODAY, one per spec — keeps the funnel stable. */
+const ENQUIRY_AGES = [0, 1, 2, 6, 9, 13, 19, 26, 34, 45, 57, 70, 88, 106];
+
 function buildEnquiries(rng: () => number, orders: Order[]): Enquiry[] {
   return ENQUIRY_SPECS.map((spec, i) => {
-    const createdAt = addDays(DEMO_TODAY, -intBetween(rng, 0, 120));
-    const ageDays = daysBetween(createdAt, DEMO_TODAY);
-    const status = ageDays <= 2
-      ? "new"
-      : weightedPick(rng, ["contacted", "converted", "closed", "new"] as const, [42, 22, 26, 10]);
+    const createdAt = addDays(DEMO_TODAY, -ENQUIRY_AGES[i]);
+    const ageDays = ENQUIRY_AGES[i];
+
+    // A funnel ages the way a real one does: fresh leads are untouched, the
+    // middle has been called, and only old leads have landed or lapsed.
+    let status: EnquiryStatus;
+    if (ageDays <= 2) status = "new";
+    else if (ageDays <= 13) status = "contacted";
+    else status = weightedPick(rng, ["converted", "closed", "contacted"] as const, [40, 38, 22]);
+
     // A converted enquiry points at a real order, so the funnel is clickable.
-    const converted = status === "converted"
-      ? orders.find((o) => o.channel === "enquiry" && o.placedAt >= createdAt)
-      : undefined;
+    const converted =
+      status === "converted"
+        ? orders.find((o) => o.channel === "enquiry" && o.placedAt >= createdAt)
+        : undefined;
+    if (status === "converted" && !converted) status = "contacted";
+
     return {
       id: id("enq", i + 1, 3),
       kind: spec.kind,
@@ -573,7 +592,7 @@ function buildEnquiries(rng: () => number, orders: Order[]): Enquiry[] {
       issue: spec.issue,
       extraInfo: spec.tonnage ? `Estimated ${spec.tonnage} tons — above the 20 t online cap.` : undefined,
       estTonnage: spec.tonnage,
-      status: converted || status !== "converted" ? status : "contacted",
+      status,
       createdAt,
       region: spec.region,
       convertedOrderId: converted?.id,
@@ -604,27 +623,36 @@ function buildActualCosts(rng: () => number, orders: Order[]): ActualCostEntry[]
   let n = 0;
   const push = (date: string, category: ActualCostEntry["category"], label: string, amount: number) => {
     n += 1;
-    entries.push({ id: id("cst", n, 3), date, category, label, amount: Math.round(amount) });
+    // A bill can never be dated after today, so the part-month we are standing
+    // in books its costs up to the demo date rather than into the future.
+    entries.push({
+      id: id("cst", n, 3),
+      date: date > DEMO_TODAY ? DEMO_TODAY : date,
+      category,
+      label,
+      amount: Math.round(amount),
+    });
   };
 
   for (const [month, monthKg] of [...kgByMonth.entries()].sort()) {
     const first = startOfMonth(`${month}-01`);
     const cost = DEFAULT_COST_CONFIG;
 
-    // Raw material arrives in two loads a month, at a blended rate a shade off
-    // the ₹13.2/kg model figure depending on the waste-paper market.
-    const rawTotal = monthKg * cost.rawMaterial * floatBetween(rng, 0.965, 1.045);
+    // Raw material arrives in two loads a month. The waste-paper market has run
+    // 5-12% above the ₹13.2/kg model figure all year — that gap is most of the
+    // unfavourable side of the variance the P&L module surfaces.
+    const rawTotal = monthKg * cost.rawMaterial * floatBetween(rng, 1.05, 1.12);
     push(addDays(first, 4), "raw-material", "Waste paper purchase — load 1", rawTotal * 0.55);
     push(addDays(first, 18), "raw-material", "Waste paper purchase — load 2", rawTotal * 0.45);
 
-    push(addDays(first, 9), "electricity", "TSSPDCL bill", monthKg * cost.electricity * floatBetween(rng, 0.88, 1.02));
+    push(addDays(first, 9), "electricity", "TSSPDCL bill", monthKg * cost.electricity * floatBetween(rng, 0.95, 1.08));
 
     // BRD §6.1 / assumption 2 — machine oiling lives inside the maintenance line.
     push(addDays(first, 6), "maintenance", "Machine oiling", 1000);
-    push(addDays(first, 21), "maintenance", "Rollers, belts & spares", Math.max(0, monthKg * cost.maintenance * floatBetween(rng, 0.82, 1.1) - 1000));
+    push(addDays(first, 21), "maintenance", "Rollers, belts & spares", Math.max(0, monthKg * cost.maintenance * floatBetween(rng, 0.95, 1.2) - 1000));
 
-    push(addDays(first, 12), "transport", "Local delivery — tempo hire", monthKg * cost.transport * 0.6 * floatBetween(rng, 0.95, 1.2));
-    push(addDays(first, 26), "transport", "Outstation freight", monthKg * cost.transport * 0.45 * floatBetween(rng, 0.9, 1.25));
+    push(addDays(first, 12), "transport", "Local delivery — tempo hire", monthKg * cost.transport * 0.62 * floatBetween(rng, 1.05, 1.25));
+    push(addDays(first, 26), "transport", "Outstation freight", monthKg * cost.transport * 0.46 * floatBetween(rng, 1.0, 1.3));
 
     if (chance(rng, 0.4)) {
       push(addDays(first, 15), "other", "Packing material & sundries", monthKg * floatBetween(rng, 0.04, 0.09));
@@ -668,5 +696,5 @@ export function buildSeed(): DataState {
   };
 }
 
-/** Exposed for the tests and the sanity harness; not used by the app. */
-export const SEED_WINDOW = { from: FIRST_ORDER_DAY, to: DEMO_TODAY, products: PRODUCTS.length };
+/** The window the seed covers — handy for empty-state copy and tests. */
+export const SEED_WINDOW = { from: FIRST_ORDER_DAY, to: DEMO_TODAY };
