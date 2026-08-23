@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   JSMB prototype design tokens.
+
+   Two palettes live here and are swapped by the `data-brand` attribute on
+   <html>, which is what the white-label toggle flips:
+
+     data-brand="jsmb"  → mill-kraft warmth: paper canvas, fired-clay primary,
+                          workshop teal. This is the pitch brand.
+     data-brand="demo"  → neutral industrial indigo, for showing the same
+                          system to a prospect who is not JSMB.
+
+   Colours are stored as bare "R G B" triplets so Tailwind can apply opacity
+   modifiers, e.g. bg-j-primary/10.
+
+   Product surfaces (storefront, admin) are light. Agent surfaces (command
+   centre, trace console, mesh) are dark by design — the contrast is what makes
+   the agent layer read as a separate, always-on system rather than a widget.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root,
+  [data-brand="jsmb"] {
+    /* Product surfaces */
+    --j-canvas: 247 244 239;
+    --j-surface: 255 255 255;
+    --j-surface-2: 251 248 243;
+    --j-line: 231 223 211;
+    --j-line-strong: 214 202 185;
+
+    /* Ink */
+    --j-ink: 25 21 18;
+    --j-ink-2: 91 81 71;
+    --j-ink-3: 139 127 114;
+
+    /* Brand */
+    --j-primary: 201 74 26;        /* fired clay — passes AA on white text  */
+    --j-primary-bright: 232 111 43; /* glows, charts, highlights only        */
+    --j-primary-soft: 253 237 229;
+    --j-accent: 14 110 99;          /* workshop teal — trust / secondary     */
+    --j-accent-soft: 225 242 239;
+    --j-gold: 200 144 26;
+
+    /* Console (agent surfaces) */
+    --j-console: 18 16 14;
+    --j-console-2: 28 25 22;
+    --j-console-3: 38 34 30;
+    --j-console-line: 52 46 40;
+    --j-console-ink: 242 237 230;
+    --j-console-ink-2: 167 156 142;
+
+    /* Agent lanes */
+    --j-lane-front: 224 118 31;
+    --j-lane-otc: 108 128 245;
+    --j-lane-back: 26 166 149;
+
+    /* Status */
+    --j-success: 18 136 94;
+    --j-success-soft: 226 245 236;
+    --j-warn: 201 138 6;
+    --j-warn-soft: 253 244 221;
+    --j-danger: 200 64 47;
+    --j-danger-soft: 253 234 231;
+    --j-info: 47 111 208;
+    --j-info-soft: 231 240 253;
+
+    --j-radius: 14px;
+  }
+
+  [data-brand="demo"] {
+    --j-canvas: 245 246 250;
+    --j-surface: 255 255 255;
+    --j-surface-2: 250 251 254;
+    --j-line: 227 230 239;
+    --j-line-strong: 205 210 226;
+
+    --j-ink: 16 19 34;
+    --j-ink-2: 70 76 99;
+    --j-ink-3: 128 135 153;
+
+    --j-primary: 66 84 200;
+    --j-primary-bright: 99 118 240;
+    --j-primary-soft: 234 236 251;
+    --j-accent: 15 122 138;
+    --j-accent-soft: 226 241 244;
+    --j-gold: 176 132 30;
+
+    --j-console: 13 15 23;
+    --j-console-2: 22 25 37;
+    --j-console-3: 31 35 51;
+    --j-console-line: 45 51 71;
+    --j-console-ink: 235 238 247;
+    --j-console-ink-2: 150 158 180;
+
+    --j-lane-front: 99 118 240;
+    --j-lane-otc: 138 106 232;
+    --j-lane-back: 15 148 160;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: rgb(var(--j-canvas));
+    color: rgb(var(--j-ink));
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Rupee figures and tonnage read as columns of numbers all over this app,
+     so tabular figures are the default for anything marked .num. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  ::selection {
+    background: rgb(var(--j-primary) / 0.2);
+  }
+}
+
+@layer components {
+  /* ── Product surfaces ──────────────────────────────────────────────── */
+
+  .j-card {
+    background: rgb(var(--j-surface));
+    border: 1px solid rgb(var(--j-line));
+    border-radius: var(--j-radius);
+    box-shadow: 0 1px 2px rgb(var(--j-ink) / 0.04), 0 8px 24px -12px rgb(var(--j-ink) / 0.12);
+  }
+
+  .j-card-flat {
+    background: rgb(var(--j-surface));
+    border: 1px solid rgb(var(--j-line));
+    border-radius: var(--j-radius);
+  }
+
+  /* Kraft-paper texture used behind hero and empty states. Pure CSS so the
+     prototype ships with no image assets and works fully offline. */
+  .j-kraft {
+    background-color: rgb(var(--j-surface-2));
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgb(var(--j-line) / 0.35) 0 1px,
+        transparent 1px 9px
+      ),
+      radial-gradient(circle at 20% 15%, rgb(var(--j-primary) / 0.06), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgb(var(--j-accent) / 0.06), transparent 45%);
+  }
+
+  /* ── Console surfaces (the agent layer) ────────────────────────────── */
+
+  .j-console {
+    background: rgb(var(--j-console));
+    color: rgb(var(--j-console-ink));
+  }
+
+  .j-console-card {
+    background: rgb(var(--j-console-2));
+    border: 1px solid rgb(var(--j-console-line));
+    border-radius: var(--j-radius);
+  }
+
+  /* The mesh canvas sits on a faint engineering grid with a warm vignette,
+     so agent nodes read as instruments on a board. */
+  .j-mesh-bg {
+    background-color: rgb(var(--j-console));
+    background-image:
+      linear-gradient(rgb(var(--j-console-line) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--j-console-line) / 0.55) 1px, transparent 1px),
+      radial-gradient(ellipse at 50% 0%, rgb(var(--j-primary) / 0.14), transparent 60%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+  }
+
+  .j-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ── Motion ────────────────────────────────────────────────────────── */
+
+  /* Breathing halo on an agent that is currently doing something. */
+  @keyframes j-pulse-ring {
+    0% { transform: scale(0.92); opacity: 0.75; }
+    70% { transform: scale(1.35); opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+  .j-pulse-ring {
+    animation: j-pulse-ring 1.6s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
+  }
+
+  /* Packet travelling along a handoff edge. Driven by stroke-dashoffset so it
+     follows whatever path the mesh lays down. */
+  @keyframes j-dash {
+    to { stroke-dashoffset: -1000; }
+  }
+  .j-dash {
+    stroke-dasharray: 6 10;
+    animation: j-dash 14s linear infinite;
+  }
+
+  @keyframes j-rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .j-rise {
+    animation: j-rise 0.28s ease-out both;
+  }
+
+  @keyframes j-caret {
+    0%, 45% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .j-caret::after {
+    content: "▌";
+    animation: j-caret 1s steps(1) infinite;
+    margin-left: 1px;
+  }
+
+  /* Tonnage meter fill — colour is set inline from the cap status. */
+  .j-meter {
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1), background-color 300ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .j-pulse-ring,
+    .j-dash,
+    .j-rise,
+    .j-caret::after {
+      animation: none !important;
+    }
+    .j-meter {
+      transition: none;
+    }
+  }
+
+  /* Thin scrollbars inside the trace console and long tables. */
+  .j-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--j-console-line)) transparent;
+  }
+  .j-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .j-scroll::-webkit-scrollbar-thumb {
+    background: rgb(var(--j-console-line));
+    border-radius: 99px;
+  }
+  .j-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
