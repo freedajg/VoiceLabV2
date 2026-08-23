@@ -21,7 +21,7 @@ const DOTS: Record<AgentChipSize, string> = {
 };
 
 export interface AgentChipProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "id" | "onClick"> {
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "id" | "onClick" | "onSelect"> {
   id: AgentId;
   size?: AgentChipSize;
   surface?: Surface;

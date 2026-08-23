@@ -12,7 +12,8 @@ const HEIGHTS: Record<InputSize, string> = {
   lg: "h-12 px-4 text-[15px]",
 };
 
-export interface TextInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface TextInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix"> {
   surface?: Surface;
   inputSize?: InputSize;
   invalid?: boolean;

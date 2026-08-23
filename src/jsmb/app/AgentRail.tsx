@@ -171,7 +171,7 @@ export function AgentRail({ embedded = false, className }: AgentRailProps) {
       ? "success"
       : status === "waiting-human"
         ? "warn"
-        : status === "error" || status === "aborted"
+        : status === "aborted"
           ? "danger"
           : "neutral";
 
