@@ -1,0 +1,32 @@
+import { test } from "vitest";
+import { buildSeed } from "../src/jsmb/domain/seed/dataset";
+import { computeSales, computePnl, computeDashboard, duesByCustomer } from "../src/jsmb/domain/analytics";
+import { computePayroll, rosterMonthlyCost } from "../src/jsmb/domain/payroll";
+import { rangeFor } from "../src/jsmb/domain/periods";
+import { DEMO_TODAY } from "../src/jsmb/domain/constants";
+import { selectAnalyticsInput } from "../src/jsmb/store/dataStore";
+
+test("probe", () => {
+  const s = buildSeed();
+  const input = selectAnalyticsInput(s);
+  console.log("orders", s.orders.length, "customers", s.customers.length, "employees", s.employees.length, "attendance", s.attendance.length, "enquiries", s.enquiries.length, "costs", s.actualCosts.length, "bonuses", s.bonuses.length);
+  const month = rangeFor("monthly", DEMO_TODAY);
+  console.log("month", month);
+  const sales = computeSales(input, month);
+  console.log("month sales", { orderCount: sales.orderCount, revenue: sales.revenue, weightKg: sales.weightKg, margin: sales.margin, series: sales.series.length });
+  const y = rangeFor("yearly", DEMO_TODAY);
+  const ysales = computeSales(input, y);
+  console.log("year sales", { orderCount: ysales.orderCount, revenue: ysales.revenue, weightKg: ysales.weightKg, margin: ysales.margin });
+  console.log("byProduct year", ysales.byProduct);
+  const pnl = computePnl(input, month);
+  console.log("month pnl", pnl);
+  const june = rangeFor("monthly", "2026-06-15");
+  console.log("june pnl", computePnl(input, june));
+  console.log("june payroll", computePayroll(s.employees, s.attendance, s.bonuses, june, s.settings).total);
+  console.log("roster monthly", rosterMonthlyCost(s.employees));
+  console.log("dash", computeDashboard(input, DEMO_TODAY, s.enquiries));
+  console.log("dues top", duesByCustomer(input).slice(0,5));
+  console.log("enquiry statuses", s.enquiries.map(e => [e.id, e.status, e.estTonnage, e.createdAt]));
+  console.log("regions", [...new Set(s.orders.map(o=>o.region))]);
+  console.log("daily", computeSales(input, rangeFor("daily", DEMO_TODAY)).orderCount, computeSales(input, rangeFor("weekly", DEMO_TODAY)).orderCount);
+});

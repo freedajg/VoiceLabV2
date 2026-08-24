@@ -6,11 +6,30 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Pinned rather than inherited: Netlify's default Node version differs between
+# older and newly created sites, and Vite 6 needs 18+. Pinning removes the
+# ambiguity so the first deploy on a fresh site behaves like local.
+[build.environment]
+  NODE_VERSION = "22"
+
 [dev]
   command = "npm run vite"
   targetPort = 5219
   port = 8888
   framework = "#custom"
+
+# JSMB multi-agent prototype — a second SPA entry. Must precede the catch-all
+# below, because Netlify applies redirect rules in order. The app itself uses
+# hash routing, so one rule covers every deep link.
+[[redirects]]
+  from = "/jsmb"
+  to = "/jsmb.html"
+  status = 200
+
+[[redirects]]
+  from = "/jsmb/*"
+  to = "/jsmb.html"
+  status = 200
 
 # SPA fallback so client routing / deep links resolve to index.html.
 [[redirects]]
