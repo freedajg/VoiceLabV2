@@ -6,6 +6,12 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Pinned rather than inherited: Netlify's default Node version differs between
+# older and newly created sites, and Vite 6 needs 18+. Pinning removes the
+# ambiguity so the first deploy on a fresh site behaves like local.
+[build.environment]
+  NODE_VERSION = "22"
+
 [dev]
   command = "npm run vite"
   targetPort = 5219
