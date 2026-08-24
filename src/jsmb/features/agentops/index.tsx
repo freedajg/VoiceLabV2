@@ -1,5 +1,7 @@
-// PLACEHOLDER — owned by the command agent in wave 2; replace wholesale.
-import { Placeholder } from "../_Placeholder";
-
-export const AgentOps = () => <Placeholder title="Agent Ops" owner="command" />;
-export const AgentDetail = () => <Placeholder title="Agent detail" owner="command" />;
+/**
+ * Agent-ops barrel — the two inspector routes from CONTRACT.md §6.
+ * `#/agents` is the full mesh + roster + trace; `#/agents/:agentId` is one
+ * agent in depth.
+ */
+export { AgentOps } from "./AgentOpsPage";
+export { AgentDetail } from "./AgentDetailPage";

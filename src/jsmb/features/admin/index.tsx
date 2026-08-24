@@ -1,12 +1,13 @@
-// PLACEHOLDER — owned by the admin agent in wave 2; replace wholesale.
-import { Placeholder } from "../_Placeholder";
-
-const owner = "admin";
-
-export const AdminDashboard = () => <Placeholder title="Dashboard" owner={owner} />;
-export const AdminCustomers = () => <Placeholder title="Customers" owner={owner} />;
-export const AdminSales = () => <Placeholder title="Sales" owner={owner} />;
-export const AdminEmployees = () => <Placeholder title="Employees" owner={owner} />;
-export const AdminPnl = () => <Placeholder title="Profit / Loss" owner={owner} />;
-export const AdminEnquiries = () => <Placeholder title="Enquiries" owner={owner} />;
-export const AdminSettings = () => <Placeholder title="Cost assumptions" owner={owner} />;
+/**
+ * Admin barrel — Ajay's seven routes from CONTRACT.md §6.
+ *
+ * The four BRD modules (Customers, Sales, Employees, Profit/Loss) plus the
+ * dashboard, the enquiry funnel and the editable cost assumptions.
+ */
+export { AdminDashboard } from "./AdminDashboard";
+export { AdminCustomers } from "./AdminCustomers";
+export { AdminSales } from "./AdminSales";
+export { AdminEmployees } from "./AdminEmployees";
+export { AdminPnl } from "./AdminPnl";
+export { AdminEnquiries } from "./AdminEnquiries";
+export { AdminSettings } from "./AdminSettings";
