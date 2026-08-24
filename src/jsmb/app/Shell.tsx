@@ -11,6 +11,7 @@ import { AgentDetailDrawer } from "./AgentDetailDrawer";
 import { PhoneFrame } from "./PhoneFrame";
 import { PresenterBar, PRESENTER_BAR_HEIGHT } from "./PresenterBar";
 import { PresenterControls } from "../features/presenter";
+import { PendingApprovals } from "../features/command/ApprovalDeck";
 
 /**
  * The frame the whole demo lives in.
@@ -30,10 +31,23 @@ export default function Shell() {
   const setRailOpen = useUiStore((s) => s.setRailOpen);
   const resetDemo = useDataStore((s) => s.resetDemo);
   const clearTrace = useAgentStore((s) => s.clearTrace);
+  const approvals = useAgentStore((s) => s.approvals);
   const location = useLocation();
 
   const onShop = location.pathname.startsWith("/shop");
   const framed = phoneFrame && onShop;
+
+  /**
+   * A blocked run has to be answerable from wherever the presenter is standing.
+   * Scenarios drive the app to the screen that gives a decision its context —
+   * the settings page for a cost change, the customer ledger for a credit call
+   * — which means the approval card on the command centre is off-screen at
+   * exactly the moment it matters. So it docks here instead, over whatever
+   * route is showing. The two together are the strongest frame in the demo:
+   * the evidence behind the decision, and the decision, at the same time.
+   */
+  const pending = approvals.filter((a) => !a.resolvedOptionId);
+  const dockApproval = pending.length > 0 && location.pathname !== "/";
 
   // Every route change scrolls the main column back to the top. Without this a
   // presenter jumping from the bottom of the P&L into the storefront lands
@@ -99,6 +113,21 @@ export default function Shell() {
           />
           <div className="w-[min(336px,88vw)] shadow-2xl">
             <AgentRail />
+          </div>
+        </div>
+      )}
+
+      {dockApproval && (
+        <div
+          className={cn(
+            "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 lg:justify-end lg:pr-[360px]",
+            // Clear the presenter bar when it is up, so the decision buttons
+            // are never sitting underneath the transport controls.
+            presenterMode ? "pb-20" : "pb-4",
+          )}
+        >
+          <div className="j-rise pointer-events-auto w-full max-w-xl">
+            <PendingApprovals />
           </div>
         </div>
       )}

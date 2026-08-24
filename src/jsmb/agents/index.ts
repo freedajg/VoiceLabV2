@@ -56,4 +56,11 @@ export {
 } from "./fixtures";
 export type { EnquiryFixture, OrderFixture } from "./fixtures";
 
-export { SCENARIOS, SCENARIO_BY_ID, SMOKE_SCENARIO } from "./scenarios";
+export {
+  SCENARIOS,
+  SCENARIO_BY_ID,
+  RETAIL_BUY,
+  CREDIT_DECISION,
+  BULK_ENQUIRY,
+  MONTH_END_CLOSE,
+} from "./scenarios";
