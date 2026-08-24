@@ -225,7 +225,15 @@ export const PRODUCT_BY_CODE: Record<ProductCode, Product> = PRODUCTS.reduce(
 
 /* ── Workforce — BRD §8.4 ──────────────────────────────────────────────── */
 
-/** Seeded roster: 1 + 2 + 5 = 7 staff, ₹1,29,000/month. */
+/**
+ * Seeded roster, exactly as itemised in BRD §8.4.
+ *
+ * NOTE — discrepancy in the source document: §8.4 states "₹1,29,000/month
+ * across 7 staff", but the roster it lists is 1 + 2 + 5 = 8 people, and
+ * ₹1,29,000 only balances at 8 (23,000 + 36,000 + 70,000). The money is the
+ * figure the P&L depends on, so we implement the itemised roster and treat the
+ * "7" as a typo. Raised with the client as an open item.
+ */
 export const ROSTER_TEMPLATE: { role: EmployeeRole; count: number; monthlySalary: number }[] = [
   { role: "Operator", count: 1, monthlySalary: 23000 },
   { role: "Machine Specialist", count: 2, monthlySalary: 18000 },

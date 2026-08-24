@@ -52,7 +52,7 @@ const steps: ScenarioStep[] = [
     message: "June register closed across the active roster. Manual entry today, biometric in V2.",
     payload: {
       month: "2026-06",
-      headcount: 7,
+      headcount: 8,
       source: "manual",
       brdRefs: ["FR-A-10"],
       v2Note: "Biometric device integration replaces this entry step without changing the maths.",
@@ -279,7 +279,7 @@ export const MONTH_END_CLOSE: Scenario = {
   title: "Month end, and a sixty-paise problem",
   subtitle: "Attendance → ₹1,29,000 payroll → period P&L → break-even → a cost change that re-flows everything",
   narration:
-    "This is the back office, and it is where the money actually is. Shram closes June's attendance and computes payroll the way the client asked — daily wage times days worked — and lands on one lakh twenty-nine thousand across seven staff. Hisab takes that figure straight from the Employees module, never off the bill ledger, because booking payroll twice would halve the profit. Then it produces the number Ajay has never had: the cost model carries labour at four rupees a kilo, real payroll is one twenty-nine, so the labour line only breaks even at thirty-two and a quarter tonnes a month. Below that, the model is flattering him. Now the part to watch closely. Waste paper has gone up sixty paise. Hisab will not change the costing on its own — it asks. Approve it and standard cost goes from twenty rupees twenty to twenty rupees eighty a kilo, and Plain Thick, which sells at exactly twenty rupees eighty a kilo, drops to zero margin. Not thin. Zero. Every quote, invoice and P&L line on the screen re-flows while you watch. That is one editable assumption, honestly modelled, showing the owner something about his own business he could not see before.",
+    "This is the back office, and it is where the money actually is. Shram closes June's attendance and computes payroll the way the client asked — daily wage times days worked — and lands on one lakh twenty-nine thousand across the eight-person roster. Hisab takes that figure straight from the Employees module, never off the bill ledger, because booking payroll twice would halve the profit. Then it produces the number Ajay has never had: the cost model carries labour at four rupees a kilo, real payroll is one twenty-nine, so the labour line only breaks even at thirty-two and a quarter tonnes a month. Below that, the model is flattering him. Now the part to watch closely. Waste paper has gone up sixty paise. Hisab will not change the costing on its own — it asks. Approve it and standard cost goes from twenty rupees twenty to twenty rupees eighty a kilo, and Plain Thick, which sells at exactly twenty rupees eighty a kilo, drops to zero margin. Not thin. Zero. Every quote, invoice and P&L line on the screen re-flows while you watch. That is one editable assumption, honestly modelled, showing the owner something about his own business he could not see before.",
   brdRefs: ["FR-A-09", "FR-A-10", "FR-A-11", "FR-A-12", "FR-A-13", "FR-A-14", "FR-A-15"],
   estSeconds: 28,
   agents: ["ORCH", "WRK", "FIN", "PRC"],

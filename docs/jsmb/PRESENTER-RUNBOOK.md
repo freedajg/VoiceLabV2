@@ -173,6 +173,14 @@ Safe things to do live:
 > They're editable settings, and changing one re-flows everything downstream.
 > That's exactly how they'll behave once he confirms them.
 
+**"Why does it say 8 employees? The BRD says 7."**
+> Because the BRD's own roster adds up to 8. §8.4 lists one operator, two
+> machine specialists and five helpers — that is eight people — and ₹1,29,000
+> only balances at eight (23,000 + 36,000 + 70,000). We implemented the
+> itemised roster and the money, and flagged the "7" as a typo to fix in the
+> next revision. Worth raising with Ajay directly; it is the kind of thing that
+> matters once payroll drives the P&L.
+
 **"Can this handle Bengaluru later?"**
 > Every order already carries `region` and `fulfillment_source`. Vahan books
 > against them today. The V3 partner and logistics model plugs in without

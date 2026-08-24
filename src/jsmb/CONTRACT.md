@@ -56,7 +56,7 @@ All of it is already encoded in `domain/constants.ts` — import, never retype:
 | 20 t cap = 800 bundles = 40 lots | `MAX_ORDER_KG/_BUNDLES/_LOTS` |
 | 7 SKUs and their prices | `PRODUCTS`, `PRODUCT_BY_CODE` |
 | ₹20.20/kg standard cost | `STANDARD_COST_PER_KG`, `DEFAULT_COST_CONFIG` |
-| 7 staff, ₹1,29,000/month | `ROSTER_TEMPLATE`, `EXPECTED_MONTHLY_PAYROLL` |
+| 8 staff, ₹1,29,000/month (BRD §8.4 says 7 — its own roster totals 8) | `ROSTER_TEMPLATE`, `EXPECTED_MONTHLY_PAYROLL` |
 | GST rate, HSN, wage divisor, delivery policy | `DEFAULT_BUSINESS_SETTINGS` |
 | Pinned "today" and RNG seed | `DEMO_TODAY`, `SEED` |
 

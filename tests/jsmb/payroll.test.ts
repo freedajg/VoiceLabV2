@@ -131,3 +131,24 @@ describe("computePayroll", () => {
     expect(result.lines.some((l) => l.employee.id === "gone" || l.employee.id === "future")).toBe(false);
   });
 });
+
+/**
+ * BRD §8.4 says "₹1,29,000/month across 7 staff" but itemises 1 Operator +
+ * 2 Machine Specialists + 5 Helpers = 8 people, and only 8 reaches ₹1,29,000.
+ * We implement the itemised roster. This test pins both halves so the
+ * discrepancy can never be silently "corrected" in the wrong direction.
+ */
+describe("BRD §8.4 roster discrepancy", () => {
+  it("is 8 people, not 7, and the money is what balances", () => {
+    const headcount = ROSTER_TEMPLATE.reduce((n, r) => n + r.count, 0);
+    expect(headcount).toBe(8);
+    expect(EXPECTED_MONTHLY_PAYROLL).toBe(129000);
+
+    // The stated total is only reachable at 8; 7 of any composition misses it.
+    const byRole = Object.fromEntries(ROSTER_TEMPLATE.map((r) => [r.role, r]));
+    expect(byRole["Operator"].count * byRole["Operator"].monthlySalary).toBe(23000);
+    expect(byRole["Machine Specialist"].count * byRole["Machine Specialist"].monthlySalary).toBe(36000);
+    expect(byRole["Helper"].count * byRole["Helper"].monthlySalary).toBe(70000);
+    expect(23000 + 36000 + 70000).toBe(EXPECTED_MONTHLY_PAYROLL);
+  });
+});
