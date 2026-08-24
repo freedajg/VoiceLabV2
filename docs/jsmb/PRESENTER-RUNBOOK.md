@@ -112,6 +112,17 @@ that re-flows the entire book.
 **Say:** *"That's one editable assumption, honestly modelled, showing the owner
 something about his own business he couldn't see before."*
 
+**Bonus, if they're engaged:** step the P&L back through the months with the
+‹ › arrows. June shipped 63.4 t, May 49.1 t, **April 32.6 t** — which is within
+a few hundred kilos of the 32.25 t break-even you just derived. So April was
+the month the mill barely covered its own wage bill, and nobody knew. That is
+the argument for the whole module in one sentence.
+
+> The P&L opens on **June**, not July. Demo "today" is 3 July, and a P&L opened
+> in the first days of a month is being opened to read the month that just
+> closed. Use the arrows to move; the period buttons switch daily/weekly/
+> monthly/yearly.
+
 ---
 
 ## Going off-script

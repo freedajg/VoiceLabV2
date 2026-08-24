@@ -14,13 +14,14 @@
 import { useCallback, useMemo } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import type { TooltipContentProps } from "recharts";
-import { Check, TriangleAlert } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, TriangleAlert } from "lucide-react";
 import {
   Badge,
   Card,
   ChartTooltip,
   GUTTER,
   PageHeader,
+  IconButton,
   SegmentedControl,
   cn,
   type ChartTooltipRow,
@@ -36,6 +37,7 @@ import {
   PERIOD_LABELS,
   PRODUCTS,
   PRODUCT_BY_CODE,
+  addDays,
   SEED_WINDOW,
   computePnl,
   endOfMonth,
@@ -216,6 +218,99 @@ export function PeriodSwitch({
       onChange={onChange}
       size="sm"
     />
+  );
+}
+
+/* ── Period navigation ─────────────────────────────────────────────────── */
+
+/** Moves an anchor date one period forward (+1) or back (-1). */
+export function shiftAnchor(period: PeriodKey, anchorISO: string, delta: number): string {
+  if (period === "daily") return addDays(anchorISO, delta);
+  if (period === "weekly") return addDays(anchorISO, delta * 7);
+  const [y, m, d] = anchorISO.split("-").map(Number);
+  if (period === "yearly") return `${y + delta}-${String(m).padStart(2, "0")}-01`;
+  // Monthly: land on the 1st so month lengths never cause a skipped month.
+  const total = y * 12 + (m - 1) + delta;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}-01`;
+}
+
+/**
+ * Where a period view opens.
+ *
+ * Current period, with one exception: a monthly P&L opened in the first days
+ * of a month is almost always being opened to read the month that just
+ * finished, not the two or three days of the new one. So early in a month it
+ * anchors to the previous one — which is also when the books actually get
+ * closed. Every other period opens on today.
+ */
+export function defaultAnchor(period: PeriodKey): string {
+  if (period !== "monthly") return TODAY;
+  const dayOfMonth = Number(TODAY.slice(8, 10));
+  return dayOfMonth <= 7 ? shiftAnchor("monthly", startOfMonth(TODAY), -1) : TODAY;
+}
+
+/** Clamps an anchor to the window the seeded data actually covers. */
+export function clampAnchor(anchorISO: string): string {
+  if (anchorISO < SEED_WINDOW.from) return SEED_WINDOW.from;
+  if (anchorISO > SEED_WINDOW.to) return SEED_WINDOW.to;
+  return anchorISO;
+}
+
+export interface PeriodNavProps {
+  period: PeriodKey;
+  onPeriodChange: (key: PeriodKey) => void;
+  anchor: string;
+  onAnchorChange: (iso: string) => void;
+  /** Label for the window currently shown, e.g. "June 2026". */
+  label: ReactNode;
+}
+
+/**
+ * The period switcher plus a stepper through consecutive windows. Without the
+ * stepper the only readable view is whatever period contains today, which is
+ * useless on the third of a month.
+ */
+export function PeriodNav({
+  period,
+  onPeriodChange,
+  anchor,
+  onAnchorChange,
+  label,
+}: PeriodNavProps) {
+  const prev = clampAnchor(shiftAnchor(period, anchor, -1));
+  const next = clampAnchor(shiftAnchor(period, anchor, 1));
+  const atStart = prev === anchor;
+  const atEnd = next === anchor;
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <PeriodSwitch
+        value={period}
+        onChange={(key) => {
+          onPeriodChange(key);
+          onAnchorChange(defaultAnchor(key));
+        }}
+      />
+      <div className="flex items-center gap-1">
+        <IconButton
+          label="Previous period"
+          icon={<ChevronLeft />}
+          size="sm"
+          variant="ghost"
+          disabled={atStart}
+          onClick={() => onAnchorChange(prev)}
+        />
+        <span className="min-w-0 px-1 text-sm font-semibold text-j-ink">{label}</span>
+        <IconButton
+          label="Next period"
+          icon={<ChevronRight />}
+          size="sm"
+          variant="ghost"
+          disabled={atEnd}
+          onClick={() => onAnchorChange(next)}
+        />
+      </div>
+    </div>
   );
 }
 

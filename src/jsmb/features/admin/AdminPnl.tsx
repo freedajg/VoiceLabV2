@@ -81,7 +81,8 @@ import {
   MAX_BAR,
   NO_ANIM,
   PRINT_AREA_ID,
-  PeriodSwitch,
+  PeriodNav,
+  defaultAnchor,
   ReconcileNote,
   Split,
   TODAY,
@@ -451,10 +452,11 @@ function PeriodView() {
   const { data, input } = useAdminData();
   const period = useUiStore((s) => s.adminPeriod);
   const setPeriod = useUiStore((s) => s.setAdminPeriod);
+  const [anchor, setAnchor] = useState(() => defaultAnchor(period));
   const theme = useChartTheme("product");
 
   const view = useMemo(() => {
-    const range = rangeFor(period, TODAY);
+    const range = rangeFor(period, anchor);
     const pnl = computePnl(input, range);
     const months = monthlyRows(input);
     const costPerKg = standardCostPerKg(input.costConfig);
@@ -522,14 +524,20 @@ function PeriodView() {
       fullMonthBreakEvenKg,
       coverage: pnl.breakEvenKg > 0 ? pnl.weightKg / pnl.breakEvenKg : 0,
     };
-  }, [data, input, period]);
+  }, [data, input, period, anchor]);
 
   const { pnl, range, lines, bridge, months } = view;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <PeriodSwitch value={period} onChange={setPeriod} />
+        <PeriodNav
+          period={period}
+          onPeriodChange={setPeriod}
+          anchor={anchor}
+          onAnchorChange={setAnchor}
+          label={range.label}
+        />
         <span className="text-[13px] text-j-ink-2">
           {range.label} · {dateShort(range.from)} – {dateShort(range.to)} · {tons(pnl.weightKg)} shipped
         </span>

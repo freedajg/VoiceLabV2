@@ -67,7 +67,8 @@ import {
   MAX_BAR,
   NO_ANIM,
   PRINT_AREA_ID,
-  PeriodSwitch,
+  PeriodNav,
+  defaultAnchor,
   ReconcileNote,
   Split,
   TODAY,
@@ -92,12 +93,13 @@ export function AdminSales() {
   const { data, input } = useAdminData();
   const period = useUiStore((s) => s.adminPeriod);
   const setPeriod = useUiStore((s) => s.setAdminPeriod);
+  const [anchor, setAnchor] = useState(() => defaultAnchor(period));
   const theme = useChartTheme("product");
   const { say } = useAgentPulse();
   const [exported, setExported] = useState(false);
 
   const view = useMemo(() => {
-    const range = rangeFor(period, TODAY);
+    const range = rangeFor(period, anchor);
     const sales = computeSales(input, range);
     const categories = categoryRollup(sales.byProduct);
 
@@ -138,7 +140,7 @@ export function AdminSales() {
       moved: sales.byProduct.filter((p) => p.weightKg > 0),
       trend: sales.series.filter((d) => d.date <= TODAY),
     };
-  }, [data, input, period]);
+  }, [data, input, period, anchor]);
 
   const { sales, range, categories, regions, trend } = view;
   const avgPerKg = sales.weightKg > 0 ? sales.revenue / sales.weightKg : 0;
@@ -198,7 +200,13 @@ export function AdminSales() {
       }
       below={
         <div className="flex flex-wrap items-center gap-3">
-          <PeriodSwitch value={period} onChange={setPeriod} />
+          <PeriodNav
+            period={period}
+            onPeriodChange={setPeriod}
+            anchor={anchor}
+            onAnchorChange={setAnchor}
+            label={range.label}
+          />
           <span className="text-[13px] text-j-ink-2">
             {range.label} · {dateShort(range.from)} – {dateShort(range.to)}
           </span>
